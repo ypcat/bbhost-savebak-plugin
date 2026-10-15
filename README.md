@@ -10,9 +10,11 @@ In the game, it exits to the title screen.
 2. Hold LT + RT + View + Menu. A banner shows `LT=load RT=save`.
 3. Release all buttons.
 4. Press one button:
-   - RT copies `saves/SPRJ0005/*` to `saves/bak/` (as `save.sh` does).
-   - LT copies `saves/bak/*` to `saves/SPRJ0005/` (as `load.sh` does).
-     Then select Continue to load the restored save.
+   - RT copies `saves/SPRJ0005/*` to `saves/bak/`. It creates `saves/bak/`
+     if it does not exist.
+   - LT copies `saves/bak/*` to `saves/SPRJ0005/`. Then select Continue to
+     load the restored save. If there is no backup, the banner shows
+     `No backup`.
    - B, the d-pad, or any other button cancels.
 5. If you press nothing for 10 seconds, the choice closes.
 

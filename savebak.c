@@ -111,8 +111,8 @@ static int copy_file(const char* from, const char* to) {
     return -1;
 }
 
-/* Copies every file in `from` (relative to the data folder) into `to`, as
- * save.sh and load.sh do. The number of files, or -1 on an error. */
+/* Copies every file in `from` (relative to the data folder) into `to`. The
+ * number of files, 0 when `from` does not exist, or -1 on an error. */
 static int copy_dir(const char* from, const char* to) {
     char src[2048], dst[2048];
     snprintf(src, sizeof src, "%s/%s", host->data_dir(), from);
@@ -120,7 +120,7 @@ static int copy_dir(const char* from, const char* to) {
     mkdir(dst, 0775);
     DIR* dir = opendir(src);
     if (!dir)
-        return -1;
+        return errno == ENOENT ? 0 : -1;
     int count = 0;
     struct dirent* e;
     while ((e = readdir(dir))) {
@@ -141,13 +141,13 @@ static int copy_dir(const char* from, const char* to) {
     return count;
 }
 
-static void run(const char* from, const char* to, const char* done) {
+static void run(const char* from, const char* to, const char* done, const char* empty) {
     int n = copy_dir(from, to);
     host->log("savebak: %s -> %s: %d files", from, to, n);
     if (n > 0)
         host->show_message(done, DONE_SECONDS);
     else
-        host->show_message(n == 0 ? "No files to copy" : "Copy failed", DONE_SECONDS);
+        host->show_message(n == 0 ? empty : "Copy failed", DONE_SECONDS);
 }
 
 /* Something pressed while the choice shows: LT restores, RT backs up, any
@@ -157,9 +157,9 @@ static void press(int which) {
         return;
     state = IDLE;
     if (which == ABS_Z)
-        run(BACKUP_DIR, SAVE_DIR, "Save loaded");
+        run(BACKUP_DIR, SAVE_DIR, "Save loaded", "No backup");
     else if (which == ABS_RZ)
-        run(SAVE_DIR, BACKUP_DIR, "Save backed up");
+        run(SAVE_DIR, BACKUP_DIR, "Save backed up", "No save");
     else
         host->show_message("Cancelled", 1.0f);
 }
